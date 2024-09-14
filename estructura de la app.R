@@ -8,8 +8,6 @@ library(RColorBrewer)
 library(viridis)
 library(data.table)
 # Definir la interfaz de usuario
-library(shiny)
-library(shinydashboard)
 
 ui <- dashboardPage(
   dashboardHeader(title = "Dashboard Nacional de Migrantes Venezolanos"),

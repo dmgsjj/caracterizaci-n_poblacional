@@ -1,7 +1,5 @@
 
 
-
-
 piramide_poblaciona_dep <- function(data, department_selection) {
   data[, age_group := cut(
     P6040,
@@ -144,36 +142,15 @@ afiliacion_salud_dep <- function(data, department_selection) {
   return(health_affiliation_dept_m)
 }
 
-a <- afiliacion_salud_dep(data, "Magdalena")
-
-getwd()
-
-result_piramide <- piramide_poblaciona_dep(data, department_selection)  # 11 para Bogotá, por ejemplo
 
 
-result_estado_civil <- marital_status_dep(data, department_selection)  # 11 para Bogotá
 
 
-result_sexo <- sexo_departamento_dep(data, department_selection)  # 11 para Bogotá
 
 
-result_educacion <- nivel_educacion_dep(data, department_selection)  # 11 para Bogotá
 
 
-result_ingreso_educacion <- ingreso_por_educacion_dep(data, department_selection)
 
-result_estadisticas_laborales <- estadisticas_laborales_dep(data, department_selection)
-
-result_tipo_trabajo <- tipo_trabajo_dep(data, department_selection)
-
-result_tipo_vivienda <- tipo_vivienda_dep(data, department_selection)
-
-
-result_condiciones_hogar <- calcular_condiciones_hogar_dep(data, department_selection)
-
-result_cobertura_salud <- cobertura_salud_dep(data, department_selection)
-
-result_afiliacion_salud <- afiliacion_salud_dep(data, department_selection)
 
 
 

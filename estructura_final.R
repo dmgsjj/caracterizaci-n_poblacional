@@ -8,6 +8,8 @@ library(tidyr)
 library(RColorBrewer)
 library(viridis)
 library(data.table)
+library(paletteer)
+library(openxlsx)
 
 # Lista de departamentos de Colombia
 departamentos_colombia <- c(
@@ -19,6 +21,8 @@ departamentos_colombia <- c(
   "Risaralda", "San Andrés y Providencia", "Santander", 
   "Sucre", "Tolima", "Valle del Cauca", "Vaupés", "Vichada"
 )
+
+
 
 # Definir la interfaz de usuario
 ui <- dashboardPage(
@@ -131,12 +135,32 @@ ui <- dashboardPage(
                 box(title = "Motivo de Migración", status = "primary", solidHeader = TRUE, width = 12,
                     plotOutput("migrationReasonsBarPlot", height = "400px"))
               )
+      ),
+      tabItem(tabName = "datos",
+              fluidRow(
+                box(
+                  title = "Visualización de Datos", status = "primary", solidHeader = TRUE, width = 12,
+                  p("Tabla interactiva con los datos descargados:"),
+                  dataTableOutput("tableData") # Espacio para la tabla
+                )
+              )
       )
     )
   )
 )
 
 server <- function(input, output, session) {
+  
+  colors <- c("#B4D4DAFF", "#A9D2DCFF", "#9ECFDDFF", "#93CDDFFF", "#86CAE1FF",
+              "#7AC7E2FF", "#76C1DFFF", "#72BCDCFF", "#6EB6D9FF", "#6AB1D6FF",
+              "#64AAD2FF", "#5BA2CCFF", "#529AC6FF", "#4993C0FF", "#3F8BBAFF",
+              "#3885B6FF", "#3281B5FF", "#2D7DB4FF", "#2678B3FF", "#1F74B1FF",
+              "#1C6FAEFF", "#1C6AA8FF", "#1C65A3FF", "#1C5F9EFF", "#1C5A99FF")
+  
+  
+  colors_gender <- c(colors[10], colors[20]) 
+  
+  pyramid_dept_wide <- read.xlsx("C:/caracterizacion_poblacional/caracterizacion_poblacional.xlsx", sheet = "Pyramid Dept")
   
   # Función reactiva para filtrar los datos según el nivel (Nacional o Departamental)
   datos_filtrados <- reactive({
@@ -234,10 +258,9 @@ output$pyramidPlot <- renderPlotly({
                                                                "30-34", "35-39", "40-44", "45-49", "50-54", "55-59", 
                                                                "60-64", "65-69", "70-74", "75-79", "80-84", "85+"))]
     
-    # Asignar colores de la paleta viridis
-    colors <- paletteer_c("ggthemes::Classic Blue", 30)
+   
     
-    # Crear gráfico de pirámide poblacional con plotly
+   
     # Crear gráfico de pirámide poblacional con plotly
     pyramid_plotly <- plot_ly(pyramid_population_result, 
                               x = ~Mujeres_pct, 
@@ -297,10 +320,9 @@ output$pyramidPlot <- renderPlotly({
     resultados <- datos_filtrados()
     sex_result <- resultados$sex_result
     
-    colors_pie <- paletteer_c("ggthemes::Classic Blue", 30)
+   
     
-    # Usar los mismos colores que el gráfico de pirámide poblacional
-    colors_gender <- c(colors[10], colors[20])  # Asignar los mismos colores para Hombres y Mujeres
+  
     
     # Crear el gráfico circular con plotly
     Sexo_r <- plot_ly(sex_result, 
@@ -336,7 +358,10 @@ output$pyramidPlot <- renderPlotly({
   output$maritalStatusBarPlot <- renderPlotly({
     resultados <- datos_filtrados()
     
+    
+    
     marital_status_result <- resultados$marital_status_result
+    
     
     marital_status_result <- marital_status_result[order(-personas)]
     
@@ -377,7 +402,7 @@ output$pyramidPlot <- renderPlotly({
                       font = list(color = 'white', face = "bold")),  # Texto de la leyenda en blanco y negrita
         plot_bgcolor = '#013B63',  # Fondo del gráfico en azul oscuro
         paper_bgcolor = '#013B63',  # Fondo del área total del gráfico en azul oscuro
-        margin = list(l = 150, r = 50, t = 50, b = 50)  # Ajustar márgenes
+        margin = list(l = 100, r = 30, t = 30, b = 30)  # Ajustar márgenes
       )
     
     # Mostrar el gráfico interactivo
@@ -424,7 +449,7 @@ output$pyramidPlot <- renderPlotly({
                       font = list(color = 'white', face = "bold")),  # Texto de la leyenda en blanco y negrita
         plot_bgcolor = '#013B63',  # Fondo del gráfico en azul oscuro
         paper_bgcolor = '#013B63',  # Fondo del área total del gráfico en azul oscuro
-        margin = list(l = 150, r = 50, t = 50, b = 50)  # Ajustar márgenes
+        margin = list(l = 100, r = 30, t = 30, b = 30)  # Ajustar márgenes
       )
     
     grafico4
@@ -506,7 +531,7 @@ output$pyramidPlot <- renderPlotly({
       x = ~total,  # El número de personas en el eje X
       y = ~variable,  # La variable en el eje Y
       color = ~P3271,  # Diferenciar por género
-      colors = colors_gender,  # Usar paleta de colores viridis
+      colors = colors,  # Usar paleta de colores viridis
       type = 'bar', 
       orientation = 'h',  # Barras horizontales
       text = ~format(round(total, 0), big.mark = ","),  # Etiquetas con separadores de miles con coma
@@ -570,7 +595,7 @@ output$pyramidPlot <- renderPlotly({
       x = ~total,  # El número de personas en el eje X
       y = ~variable,  # La variable en el eje Y
       color = ~P3271,  # Diferenciar por género
-      colors = colors_gender,  # Usar paleta de colores viridis
+      colors = colors,  # Usar paleta de colores viridis
       type = 'bar', 
       orientation = 'h',  # Barras horizontales
       text = ~paste0(format(round(total, 1), big.mark = ","), "%"),  # Etiquetas con separadores de miles con coma
@@ -639,8 +664,8 @@ output$pyramidPlot <- renderPlotly({
           font = list(size = 16, face = "bold")),
         xaxis = list(title = 'Número de Personas',
                      tickformat = ',',
-                     tickfont = list(size = 12, family = "bold"),  # Etiquetas en negrita
-                     titlefont = list(size = 14, family = "bold")),
+                     tickfont = list(size = 12, color = 'white', family = "bold"),  # Etiquetas en negrita
+                     titlefont = list(size = 14,color = 'white', family = "bold")),
         yaxis = list(
           tickfont = list(size = 12, color = 'white', family = "bold"),  # Etiquetas del eje Y en negrita
           titlefont = list(size = 14,color = 'white',  family = "bold"),
@@ -879,10 +904,11 @@ output$pyramidPlot <- renderPlotly({
     grafico12
   })
   
-  output$interactivityMessage <- renderText({
-    req(datos_filtrados())  # Asegurarse de que datos_filtrados() no sea NULL
-    "Para la interactividad, considere usar `Shiny`."
+  output$tableData <- DT::renderDataTable({
+    DT::datatable(pyramid_dept_wide, 
+                  options = list(pageLength = 10, autoWidth = TRUE))
   })
+  
 }
 
 shinyApp(ui = ui, server = server)

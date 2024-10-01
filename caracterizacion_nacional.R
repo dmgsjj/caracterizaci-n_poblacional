@@ -1,4 +1,5 @@
 library(data.table)
+
 # Pirámide poblacional a nivel nacional
 pyramid_population_nacional <- function(data) {
   data[, age_group := cut(
@@ -70,7 +71,6 @@ group_variables_nacional <- function(data) {
 }
 
 
-mer <- group_variables_nacional(data)
 
 # Tipo de trabajo a nivel nacional
 job_type_nacional <- function(data) {

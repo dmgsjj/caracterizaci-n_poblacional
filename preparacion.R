@@ -2,9 +2,9 @@
 ########### PREPRACION DEL CODIGO  #############
 
 # Cargar paquetes necesarios
-install.packages("scales")
 library(data.table)
 library(scales)
+data <- fread(file = "C:/caracterizacion_poblacional/geih_complete.csv")
 
 #REEMPLAZAR CODIGO DE LOS DEPARTAMENTOS POR SU NOMBRE RESPECTIVO
 data[, DPTO := fcase(
@@ -74,7 +74,7 @@ data[, P3042 := education_map_short[as.character(P3042)]]
 
 # Mapear acceso a salud
 acceso_health <- c(
-  "9" = "no_informa", "2" = "No", "1" = "Sí"
+  "9" = "No informa", "2" = "No", "1" = "Sí"
 )
 data[, P6090 := acceso_health[as.character(P6090)]]
 
@@ -90,8 +90,8 @@ data[, P6100 := replacement_map_afiliacion[as.character(P6100)]]
 
 # Mapear tipos de trabajo
 ocupacion_map_short <- c(
-  "1" = "Empleado privado", "2" = "Empleado gobierno", "3" = "Empleado doméstico",
-  "4" = "Cuenta propia", "5" = "Empleador", "6" = "Familiar sin pago",
+  "1" = "Empleado de empresa particular", "2" = "Empleado del gobierno", "3" = "Empleado doméstico",
+  "4" = "Cuenta propia", "5" = "Empleador", "6" = "Trabajador familiar sin pago",
   "7" = "Trabajador sin pago", "8" = "Jornalero", "9" = "Otro"
 )
 data[, P6430 := ocupacion_map_short[as.character(P6430)]]
@@ -100,7 +100,7 @@ data[, P6430 := ocupacion_map_short[as.character(P6430)]]
 
 # Mapear tipos de vivienda
 propiedad_map_short <- c(
-  "1" = "Propia, totalmente pagada", "2" = "Propia, la están pagando",
+  "1" = "Propia, pagada", "2" = "Propia, la están pagando",
   "3" = "En arriendo/subarriendo", "4" = "En usufructo", "5" = "Posesión sin título",
   "6" = "Propiedad colectiva", "7" = "Otra"
 )
@@ -135,6 +135,33 @@ data[, P4030S2 := replacement_con[as.character(P4030S2)] ]
 data[, P4030S3 := replacement_con[as.character(P4030S3)] ]
 
 data[, P4030S5 := replacement_con[as.character(P4030S5)] ]
+
+
+# Definir las variables de interés para el análisis de migrantes
+migrant_variables <- c(
+  # Variables identificadoras
+  "DIRECTORIO", "SECUENCIA_P", "ORDEN", "HOGAR", "FEX_C18", "DPTO", "MES", "PERIODO", "PER", "AREA", "REGIS",
+  # Variables de Migración
+  "P3373S3", "P3374S1", "P3374S2", "P3374S3", "P3373S3A1",
+  # Variables Demográficas
+  "P6040", "P3271", "P6070",
+  # Variables Educativas
+  "P3042", "P6170",
+  # Variables Laborales
+  "OCI", "DSI", "INGLABO", "P6430", "P6800", "PT", "FT", "PET",
+  # Variables de Vivienda y Hogar
+  "P4000", "P4030S1", "P4030S2", "P4030S3", "P4030S5", "P6008", "P70", "P5090",
+  # Variables de Salud
+  "P6090", "P6100",
+  # Variables de Motivos de Migración
+  "P3386"
+)
+
+###################### DATA.TABLE, FILTRADA PARA LOS VENEZOLANOS #############
+
+
+# Filtrar los datos de migrantes que cumplan ciertas condiciones
+Venezuelan_Migrants <- data[P3373S3 == 862 & P3374S1 == 862, migrant_variables, with = FALSE]
 
 
 

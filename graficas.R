@@ -14,11 +14,7 @@ calcular_afiliacion_salud_result = calcular_afiliacion_salud_nacional(data)
 ######PRIRAMIDE 
 
 
-# Asegurar que el rango de edad esté ordenado de menor a mayor
-pyramid_population_result[, age_group := factor(age_group, 
-                                                levels = c("0-4", "5-9", "10-14", "15-19", "20-24", "25-29", 
-                                                           "30-34", "35-39", "40-44", "45-49", "50-54", "55-59", 
-                                                           "60-64", "65-69", "70-74", "75-79", "80-84", "85+"))]
+
 
 # Asignar colores de la paleta viridis
 colors <- viridis(2, option = "viridis")
@@ -130,7 +126,7 @@ colors <- c("#B4D4DAFF", "#A9D2DCFF", "#9ECFDDFF", "#93CDDFFF", "#86CAE1FF",
             "#64AAD2FF", "#5BA2CCFF", "#529AC6FF", "#4993C0FF", "#3F8BBAFF",
             "#3885B6FF", "#3281B5FF", "#2D7DB4FF", "#2678B3FF", "#1F74B1FF",
             "#1C6FAEFF", "#1C6AA8FF", "#1C65A3FF", "#1C5F9EFF", "#1C5A99FF",
-            "#1F5591FF", "#225188FF", "#244D7FFF", "#254976FF", "#26456EFF")
+            "#1F5591FF", "#225188FF", "#244D7FFF")
 
 # Crear el gráfico con plotly
 grafico3 <- plot_ly(
@@ -168,7 +164,7 @@ grafico3 <- grafico3 %>%
                   font = list(color = 'white', face = "bold")),  # Texto de la leyenda en blanco y negrita
     plot_bgcolor = '#013B63',  # Fondo del gráfico en azul oscuro
     paper_bgcolor = '#013B63',  # Fondo del área total del gráfico en azul oscuro
-    margin = list(l = 150, r = 50, t = 50, b = 50)  # Ajustar márgenes
+    margin = list(l = 150, r = 50, t = 50, b = 150)  # Ajustar márgenes
   )
 
 # Mostrar el gráfico interactivo

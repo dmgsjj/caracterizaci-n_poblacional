@@ -49,6 +49,10 @@
 
 /* Body */
 
+#DataTables_Table_0_wrapper {
+  color: white !important;
+}
+
  /* Fondo del cuerpo principal (detrás de las cajas) */
  .content-wrapper,
  .right-side { 
@@ -107,4 +111,23 @@
 .shiny-input-select .option:hover {
   background-color: #01243f; /* Cambia el fondo al pasar por encima de una opción */
   color: white;              /* Cambia el color del texto */
+}
+
+#tableData .dataTables_wrapper{
+  color: white;
+}
+
+table.dataTable.compact thead th,table.dataTable.compact thead td,table.dataTable.compact tfoot th,table.dataTable.compact tfoot td,table.dataTable.compact tbody th,table.dataTable.compact .dataTables_wrapper tbody td {
+    padding: 4px
+    color:white;
+}
+
+table.dataTable th,table.dataTable td {
+    box-sizing: content-box
+}
+
+#DataTables_Table_3_wrapper.dataTables_wrapper {
+    position: relative;
+    clear: both;
+    color: white;
 }

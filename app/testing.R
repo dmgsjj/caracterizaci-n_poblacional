@@ -1,15 +1,10 @@
 library(shiny)
-library(plotly)
 library(shinydashboard)
-library(ggplot2)
-library(dplyr)
-library(reshape2)
-library(tidyr)
-library(RColorBrewer)
-library(viridis)
 library(data.table)
-library(paletteer)
-library(openxlsx)
+library(plotly)
+library(viridis)
+library(DT)
+
 
 # Lista de departamentos de Colombia
 departamentos_colombia <- c(
@@ -22,19 +17,17 @@ departamentos_colombia <- c(
   "Sucre", "Tolima", "Valle del Cauca", "Vaupés", "Vichada"
 )
 
-
-
 # Definir la interfaz de usuario
 ui <- dashboardPage(
   dashboardHeader(title = "Dashboard"),
   dashboardSidebar(
     sidebarMenu(
+      id = "tabs",  # Asegurarse de tener un ID para las pestañas
       menuItem("Demografía", tabName = "demographics", icon = icon("users")),
       menuItem("Educación", tabName = "education", icon = icon("graduation-cap")),
       menuItem("Mercado Laboral", tabName = "labor_market", icon = icon("briefcase")),
       menuItem("Vivienda", tabName = "housing", icon = icon("home")),
       menuItem("Salud", tabName = "health", icon = icon("medkit")),
-      menuItem("Resumen", tabName = "Resumen", icon = icon("info-circle")),
       menuItem("Datos", tabName = "datos", icon = icon("database"))
     )
   ),
@@ -47,20 +40,23 @@ ui <- dashboardPage(
         href = "radar_style.css")),
     tags$script(src = 'id_generate.js'),
     fluidRow(
-      # Filtros
-      box(title = "Seleccionar Nivel", status = "primary", solidHeader = TRUE, width = 6,
-          selectInput("level_selection", "Nivel:", choices = c("Nacional", "Departamental")),
-          conditionalPanel(
-            condition = "input.level_selection == 'Departamental'",
-            selectInput("department_selection", "Seleccionar Departamento:", choices = departamentos_colombia)
-          )
-      ),
-      box(title = "Migración Venezolana", status = "primary", solidHeader = TRUE, width = 6,
-          selectInput("migration_filter", "Migración Venezolana:", choices = c("Todos", "Solo Migración Venezolana"))
+      # Filtros visibles en todas las pestañas excepto "Datos"
+      conditionalPanel(
+        condition = "input.tabs != 'datos'",  # Filtrar por las pestañas activas
+        box(title = "Seleccionar Nivel", status = "primary", solidHeader = TRUE, width = 6,
+            selectInput("level_selection", "Nivel:", choices = c("Nacional", "Departamental")),
+            conditionalPanel(
+              condition = "input.level_selection == 'Departamental'",
+              selectInput("department_selection", "Seleccionar Departamento:", choices = departamentos_colombia)
+            )
+        ),
+        box(title = "Migración Venezolana", status = "primary", solidHeader = TRUE, width = 6,
+            selectInput("migration_filter", "Migración Venezolana:", choices = c("Todos", "Solo Migración Venezolana"))
+        )
       )
     ),
     
-    # Agregar los gráficos por pestaña
+    
     tabItems(
       tabItem(tabName = "demographics",
               fluidRow(
@@ -130,18 +126,17 @@ ui <- dashboardPage(
                 )
               )
       ),
-      tabItem(tabName = "migration_reasons",
-              fluidRow(
-                box(title = "Motivo de Migración", status = "primary", solidHeader = TRUE, width = 12,
-                    plotOutput("migrationReasonsBarPlot", height = "400px"))
-              )
-      ),
       tabItem(tabName = "datos",
+              fluidRow(
+                box(title = "Seleccionar Hoja", status = "primary", solidHeader = TRUE, width = 12,
+                    uiOutput("sheet_selector")  # Selector de hojas
+                )
+              ),
               fluidRow(
                 box(
                   title = "Visualización de Datos", status = "primary", solidHeader = TRUE, width = 12,
                   p("Tabla interactiva con los datos descargados:"),
-                  dataTableOutput("tableData") # Espacio para la tabla
+                  DT::DTOutput("tableData")
                 )
               )
       )
@@ -149,8 +144,46 @@ ui <- dashboardPage(
   )
 )
 
+# Definir el servidor
 server <- function(input, output, session) {
   
+  # Rutas de los archivos
+  nacional_file <- "C:/caracterizacion_poblacional/caracterizacion_poblacional.xlsx"
+  migrante_file <- "C:/caracterizacion_poblacional/caracterizacion_vene_dep.xlsx"
+  
+  # Cargar los nombres de las hojas cuando el archivo es seleccionado
+  observeEvent(input$level_selection, {
+    if (input$level_selection == "Nacional") {
+      sheets <- getSheetNames(nacional_file)  # Obtener nombres de hojas directamente
+    } else {
+      sheets <- getSheetNames(migrante_file)  # Obtener nombres de hojas directamente
+    }
+    
+    # Mensaje de depuración para ver las hojas disponibles
+    print(paste("Hojas disponibles en el archivo:", paste(sheets, collapse = ", ")))
+    
+    # Crea un selector de hojas dinámico
+    output$sheet_selector <- renderUI({
+      selectInput("sheet_choice", "Selecciona la hoja:", choices = sheets)
+    })
+  })
+  
+  # Cargar los datos de la hoja seleccionada y mostrarlos en la tabla
+  output$tableData <- DT::renderDT({  # Cambiado a DT::renderDT
+    req(input$sheet_choice)  # Asegúrate de que haya una hoja seleccionada
+    
+    # Leer la hoja seleccionada y devolver los datos
+    if (input$level_selection == "Nacional") {
+      data <- read.xlsx(nacional_file, sheet = input$sheet_choice)
+    } else {
+      data <- read.xlsx(migrante_file, sheet = input$sheet_choice)
+    }
+    
+    # Verifica que los datos se hayan cargado
+    print(head(data))  # Mensaje de depuración para verificar los datos
+    
+    datatable(data, options = list(pageLength = 10))
+  })
   colors <- c("#B4D4DAFF", "#A9D2DCFF", "#9ECFDDFF", "#93CDDFFF", "#86CAE1FF",
               "#7AC7E2FF", "#76C1DFFF", "#72BCDCFF", "#6EB6D9FF", "#6AB1D6FF",
               "#64AAD2FF", "#5BA2CCFF", "#529AC6FF", "#4993C0FF", "#3F8BBAFF",
@@ -160,7 +193,7 @@ server <- function(input, output, session) {
   
   colors_gender <- c(colors[10], colors[20]) 
   
-  pyramid_dept_wide <- read.xlsx("C:/caracterizacion_poblacional/caracterizacion_poblacional.xlsx", sheet = "Pyramid Dept")
+  
   
   # Función reactiva para filtrar los datos según el nivel (Nacional o Departamental)
   datos_filtrados <- reactive({
@@ -220,7 +253,7 @@ server <- function(input, output, session) {
           calcular_acceso_salud_result = cobertura_salud_dep(data, input$department_selection),
           calcular_afiliacion_salud_result = afiliacion_salud_dep(data, input$department_selection)
         )
-      
+        
       } else {
         
         resultados <- list(
@@ -245,12 +278,11 @@ server <- function(input, output, session) {
   
   
   
-output$pyramidPlot <- renderPlotly({
+  output$pyramidPlot <- renderPlotly({
     resultados <- datos_filtrados()
     pyramid_population_result <- resultados$pyramid_population_result
+    
 
-    library(plotly)
-    library(viridis)
     
     # Asegurar que el rango de edad esté ordenado de menor a mayor
     pyramid_population_result[, age_group := factor(age_group, 
@@ -258,9 +290,6 @@ output$pyramidPlot <- renderPlotly({
                                                                "30-34", "35-39", "40-44", "45-49", "50-54", "55-59", 
                                                                "60-64", "65-69", "70-74", "75-79", "80-84", "85+"))]
     
-   
-    
-   
     # Crear gráfico de pirámide poblacional con plotly
     pyramid_plotly <- plot_ly(pyramid_population_result, 
                               x = ~Mujeres_pct, 
@@ -312,17 +341,13 @@ output$pyramidPlot <- renderPlotly({
     # Mostrar el gráfico interactivo con los valores en blanco y negrita
     pyramid_plotly
     
-})
-
+  })
+  
   
   output$genderPiePlot <- renderPlotly ({
     
     resultados <- datos_filtrados()
     sex_result <- resultados$sex_result
-    
-   
-    
-  
     
     # Crear el gráfico circular con plotly
     Sexo_r <- plot_ly(sex_result, 
@@ -342,13 +367,13 @@ output$pyramidPlot <- renderPlotly({
     # Layout del gráfico
     Sexo_r <- Sexo_r %>%
       layout(  # Título en blanco y negrita
-             legend = list(title = list(text = "Género", font = list(color = 'white', face = "bold")),  # Título de la leyenda en blanco
-                           font = list(color = 'white', face = "bold"),  # Texto de la leyenda en blanco
-                           x = 0.9,  # Posición de la leyenda
-                           y = 0.5), 
-             plot_bgcolor = '#013B63',  # Color de fondo
-             paper_bgcolor = '#013B63',  # Color del área total del gráfico
-             margin = list(l = 100, r = 30, t = 10, b = 10))
+        legend = list(title = list(text = "Género", font = list(color = 'white', face = "bold")),  # Título de la leyenda en blanco
+                      font = list(color = 'white', face = "bold"),  # Texto de la leyenda en blanco
+                      x = 0.9,  # Posición de la leyenda
+                      y = 0.5), 
+        plot_bgcolor = '#013B63',  # Color de fondo
+        paper_bgcolor = '#013B63',  # Color del área total del gráfico
+        margin = list(l = 100, r = 30, t = 10, b = 10))
     
     # Mostrar el gráfico interactivo
     Sexo_r
@@ -358,13 +383,9 @@ output$pyramidPlot <- renderPlotly({
   output$maritalStatusBarPlot <- renderPlotly({
     resultados <- datos_filtrados()
     
-    
-    
     marital_status_result <- resultados$marital_status_result
     
-    
     marital_status_result <- marital_status_result[order(-personas)]
-    
     
     # Crear el gráfico con plotly
     grafico3 <- plot_ly(
@@ -455,9 +476,8 @@ output$pyramidPlot <- renderPlotly({
     grafico4
   })
   
-  
   output$incomeBarPlot <- renderPlotly({
-   
+    
     
     resultados <- datos_filtrados()
     income_by_education_result <- resultados$income_by_education_result
@@ -481,26 +501,26 @@ output$pyramidPlot <- renderPlotly({
     # Configurar el diseño del gráfico
     grafico5 <- grafico5 %>%
       
-    layout(
-      # Título en blanco y negrita
-      xaxis = list(title = 'Ingreso Promedio',
-                   tickformat = ',',  # Formato de los números
-                   tickfont = list(size = 12, color = 'white', family = "bold"),  # Etiquetas del eje X en blanco y negrita
-                   titlefont = list(size = 14, color = 'white', family = "bold")),  # Título del eje X en blanco y negrita
-      yaxis = list(title = '',
-                   tickfont = list(size = 12, color = 'white', family = "bold"),  # Etiquetas del eje Y en blanco y negrita
-                   titlefont = list(size = 14),
-                   automargin = TRUE,
-                   ticklabelposition = "outside",  # Posicionar las etiquetas fuera del eje
-                   ticklen = 8,  # Ajustar longitud de las etiquetas
-                   tickwidth = 1,  # Ajustar grosor de las líneas de las etiquetas
-                   tickcolor = '#013B63'),  # Aumentar el margen automáticamente
-      legend = list(title = list(text = '', font = list(color = 'white', face = "bold")),  # Eliminar el título de la leyenda
-                    font = list(color = 'white', face = "bold")),  # Texto de la leyenda en blanco y negrita
-      plot_bgcolor = '#013B63',  # Fondo del gráfico en azul oscuro
-      paper_bgcolor = '#013B63',  # Fondo del área total del gráfico en azul oscuro
-      margin = list(l = 150, r = 50, t = 50, b = 50)  # Ajustar márgenes
-    )
+      layout(
+        # Título en blanco y negrita
+        xaxis = list(title = 'Ingreso Promedio',
+                     tickformat = ',',  # Formato de los números
+                     tickfont = list(size = 12, color = 'white', family = "bold"),  # Etiquetas del eje X en blanco y negrita
+                     titlefont = list(size = 14, color = 'white', family = "bold")),  # Título del eje X en blanco y negrita
+        yaxis = list(title = '',
+                     tickfont = list(size = 12, color = 'white', family = "bold"),  # Etiquetas del eje Y en blanco y negrita
+                     titlefont = list(size = 14),
+                     automargin = TRUE,
+                     ticklabelposition = "outside",  # Posicionar las etiquetas fuera del eje
+                     ticklen = 8,  # Ajustar longitud de las etiquetas
+                     tickwidth = 1,  # Ajustar grosor de las líneas de las etiquetas
+                     tickcolor = '#013B63'),  # Aumentar el margen automáticamente
+        legend = list(title = list(text = '', font = list(color = 'white', face = "bold")),  # Eliminar el título de la leyenda
+                      font = list(color = 'white', face = "bold")),  # Texto de la leyenda en blanco y negrita
+        plot_bgcolor = '#013B63',  # Fondo del gráfico en azul oscuro
+        paper_bgcolor = '#013B63',  # Fondo del área total del gráfico en azul oscuro
+        margin = list(l = 150, r = 50, t = 50, b = 50)  # Ajustar márgenes
+      )
     
     # Mostrar el gráfico interactivo
     grafico5
@@ -574,7 +594,7 @@ output$pyramidPlot <- renderPlotly({
   output$laborMarketBarPlot2 <- renderPlotly({
     
     resultados <- datos_filtrados()
-  
+    
     group_variables_result <- resultados$group_variables_result
     
     # Convertir a formato largo y calcular el total por variable y género
@@ -747,10 +767,10 @@ output$pyramidPlot <- renderPlotly({
     home_conditions_long <- 
       pivot_longer(home_conditions_result, 
                    cols = c("porcentaje_electri", "porcentaje_gas", 
-                                                "porcentaje_alcan", "porcentaje_acue"),
-                                         names_to = "variable",
-                                         values_to = "valor"
-    ) %>%
+                            "porcentaje_alcan", "porcentaje_acue"),
+                   names_to = "variable",
+                   values_to = "valor"
+      ) %>%
       group_by(acceso, variable) %>%
       summarize(total = sum(valor), .groups = 'drop') %>%
       # Reordenar las variables en función del total
@@ -854,8 +874,8 @@ output$pyramidPlot <- renderPlotly({
   
   # Tipo de Afiliación al Sistema de Salud
   output$healthAffiliationBarPlot <- renderPlotly({
-  
-  
+    
+    
     resultados <- datos_filtrados()
     
     calcular_afiliacion_salud_result <- resultados$calcular_afiliacion_salud_result
@@ -903,16 +923,8 @@ output$pyramidPlot <- renderPlotly({
     # Mostrar el gráfico interactivo
     grafico12
   })
-  
-  output$tableData <- DT::renderDataTable({
-    DT::datatable(pyramid_dept_wide, 
-                  options = list(pageLength = 10, autoWidth = TRUE))
-  })
-  
 }
 
-shinyApp(ui = ui, server = server)
-
-
-
+# Correr la aplicación Shiny
+shinyApp(ui, server)
 

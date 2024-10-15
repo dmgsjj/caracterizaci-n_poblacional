@@ -2,4 +2,4 @@
 .Rhistory
 .RData
 .Ruserdata
-geih_complete.csv
+*.csv

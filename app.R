@@ -1,10 +1,20 @@
 library(shiny)
-library(shinydashboard)
-library(data.table)
 library(plotly)
+library(shinydashboard)
+library(ggplot2)
+library(dplyr)
+library(reshape2)
+library(tidyr)
+library(RColorBrewer)
 library(viridis)
+library(data.table)
+library(paletteer)
+library(openxlsx)
 library(DT)
 
+source("C:/caracterizacion_poblacional/preparacion/caracterizacion_nacional.R")
+source("C:/caracterizacion_poblacional/preparacion/caracterizacion_departamento.R")
+source("C:/caracterizacion_poblacional/preparacion/preparacion.R")
 
 # Lista de departamentos de Colombia
 departamentos_colombia <- c(
@@ -148,8 +158,8 @@ ui <- dashboardPage(
 server <- function(input, output, session) {
   
   # Rutas de los archivos
-  nacional_file <- "C:/caracterizacion_poblacional/caracterizacion_poblacional.xlsx"
-  migrante_file <- "C:/caracterizacion_poblacional/caracterizacion_vene_dep.xlsx"
+  nacional_file <- "C:/caracterizacion_poblacional/data.frame/caracterizacion_poblacional.xlsx"
+  migrante_file <- "C:/caracterizacion_poblacional/data.frame/caracterizacion_vene_dep.xlsx"
   
   # Cargar los nombres de las hojas cuando el archivo es seleccionado
   observeEvent(input$level_selection, {

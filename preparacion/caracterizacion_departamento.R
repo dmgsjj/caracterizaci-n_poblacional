@@ -1,5 +1,5 @@
 
-
+library(data.table)
 piramide_poblaciona_dep <- function(data, department_selection) {
   data[, age_group := cut(
     P6040,
@@ -10,16 +10,16 @@ piramide_poblaciona_dep <- function(data, department_selection) {
   )]
   
   # Calcular población por grupo de edad y sexo
-  pyramid_dept_m <- data[DPTO== department_selection, .(personas = sum(FEX_C18, na.rm = TRUE) / 7), by = .(DPTO, age_group, P3271)]
-  pyramid_dept_wide_m <- dcast(pyramid_dept_m, DPTO + age_group ~ P3271, value.var = "personas", fill = 0)
-  pyramid_dept_wide_m[, total_poblacion := sum(abs(Hombres)) + sum(Mujeres), by = DPTO]
+  pyramid_dept_m <- data[DPTO == department_selection, .(personas = sum(FEX_C18, na.rm = TRUE) / 7), by = .(DPTO, age_group, P3271)]
+  print(pyramid_dept_m)
+  pyramid_dept_wide_m <- as.data.table(dcast(pyramid_dept_m, DPTO + age_group ~ P3271, value.var = "personas", fill = 0))
+  pyramid_dept_wide_m[, total_poblacion := sum(abs(Hombres)) + sum(Mujeres)]
   pyramid_dept_wide_m[, Hombres_pct := (abs(Hombres) / total_poblacion) * 100]
   pyramid_dept_wide_m[, Mujeres_pct := (Mujeres / total_poblacion) * 100]
   pyramid_dept_wide_m[, Mujeres_pct := -Mujeres_pct]
   
   return(pyramid_dept_wide_m)
 }
-
 
 
 
@@ -38,7 +38,7 @@ sexo_departamento_dep <- function(data, department_selection) {
   return(sex_dept_m)
 }
 
-sexo <- sexo_departamento_dep(data, "Magdalena")
+
 
 # 2. EDUCACIÓN
 

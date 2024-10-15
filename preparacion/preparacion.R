@@ -4,7 +4,8 @@
 # Cargar paquetes necesarios
 library(data.table)
 library(scales)
-data <- fread(file = "C:/caracterizacion_poblacional/geih_complete.csv")
+data <- fread(file = "C:/caracterizacion_poblacional/data.frame/geih_complete.csv")
+
 
 #REEMPLAZAR CODIGO DE LOS DEPARTAMENTOS POR SU NOMBRE RESPECTIVO
 data[, DPTO := fcase(

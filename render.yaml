@@ -1,0 +1,10 @@
+version: 1
+services:
+  web:
+    type: docker
+    dockerfilePath: ./Dockerfile
+    env: docker
+    autoDeploy: true
+    region: oregon  # Puedes cambiar la región según tus necesidades
+    buildCommand: ""  # Puedes dejar esto vacío si ya lo gestionas en el Dockerfile
+    startCommand: "/usr/bin/shiny-server"  # Cambia según sea necesario

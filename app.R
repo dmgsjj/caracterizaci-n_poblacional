@@ -11,6 +11,7 @@ library(data.table)
 library(paletteer)
 library(openxlsx)
 library(DT)
+getwd()
 
 source("C:/caracterizacion_poblacional/preparacion/caracterizacion_nacional.R")
 source("C:/caracterizacion_poblacional/preparacion/caracterizacion_departamento.R")

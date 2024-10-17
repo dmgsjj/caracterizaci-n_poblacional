@@ -1,0 +1,13 @@
+name: caracterizacion_poblacional
+title: caracterizacion_poblacional
+username: jsidte-daniel-molina
+account: jsidte-daniel-molina
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 13039755
+bundleId: 9232451
+url: https://jsidte-daniel-molina.shinyapps.io/caracterizacion_poblacional/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .gitattributes|.RData|.RDataTmp|caracterizaci-n_poblacional/README.md|clave.R|data.frame/archivos de excel.R|data.frame/caracterizacion_poblacional.xlsx|data.frame/caracterizacion_vene_dep.xlsx|funciones/join_geih.R|graficas.R|preparacion/caracterizacion_departamento.R|preparacion/caracterizacion_nacional.R|preparacion/preparacion.R|README.md|www/id_generate.js|www/index|www/radar_style.css|datos

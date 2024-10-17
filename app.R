@@ -11,11 +11,12 @@ library(data.table)
 library(paletteer)
 library(openxlsx)
 library(DT)
-getwd()
 
-source("C:/caracterizacion_poblacional/preparacion/caracterizacion_nacional.R")
-source("C:/caracterizacion_poblacional/preparacion/caracterizacion_departamento.R")
-source("C:/caracterizacion_poblacional/preparacion/preparacion.R")
+source('funciones/join_geih.R')
+source('preparacion/caracterizacion_nacional.R')
+source('preparacion/caracterizacion_departamento.R')
+source('preparacion/preparacion.R')
+
 
 # Lista de departamentos de Colombia
 departamentos_colombia <- c(
@@ -159,8 +160,8 @@ ui <- dashboardPage(
 server <- function(input, output, session) {
   
   # Rutas de los archivos
-  nacional_file <- "C:/caracterizacion_poblacional/data.frame/caracterizacion_poblacional.xlsx"
-  migrante_file <- "C:/caracterizacion_poblacional/data.frame/caracterizacion_vene_dep.xlsx"
+  nacional_file <- 'data.frame/caracterizacion_poblacional.xlsx'
+  migrante_file <- 'data.frame/caracterizacion_vene_dep.xlsx'
   
   # Cargar los nombres de las hojas cuando el archivo es seleccionado
   observeEvent(input$level_selection, {

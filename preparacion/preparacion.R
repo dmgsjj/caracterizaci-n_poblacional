@@ -1,14 +1,11 @@
-
-########### PREPRACION DEL CODIGO  #############
-
 # Cargar paquetes necesarios
 library(data.table)
 library(scales)
 
-data <- geih_completed()
+geih <- geih_completed()
 
 #REEMPLAZAR CODIGO DE LOS DEPARTAMENTOS POR SU NOMBRE RESPECTIVO
-data[, DPTO := fcase(
+geih[, DPTO := fcase(
   DPTO == "5", "Antioquia",
   DPTO == "8", "Atlántico",
   DPTO == "11", "Bogotá",
@@ -45,8 +42,6 @@ data[, DPTO := fcase(
   default = NA_character_
 )]
 
-
-
 # 1. Estado civil
 
 # Mapear valores de variables con códigos a descripciones legibles
@@ -55,8 +50,7 @@ replacement_map_estado_civil <- c(
   "1" = "Pareja < 2 años", "2" = "Pareja >= 2 años", "3" = "Casado(a)",
   "4" = "Separado/Divorciado", "5" = "Viudo(a)", "6" = "Soltero(a)"
 )
-data[, P6070 := replacement_map_estado_civil[as.character(P6070)]]
-
+geih[, P6070 := replacement_map_estado_civil[as.character(P6070)]]
 
 # 2. Nivel de educación alcanzado
 
@@ -68,24 +62,22 @@ education_map_short <- c(
   "10" = "Universitaria", "11" = "Especialización", "12" = "Maestría",
   "13" = "Doctorado", "99" = "No sabe"
 )
-data[, P3042 := education_map_short[as.character(P3042)]]
+geih[, P3042 := education_map_short[as.character(P3042)]]
 
-
-# 3.Acceso a salud
+# 3. Acceso a salud
 
 # Mapear acceso a salud
 acceso_health <- c(
   "9" = "No informa", "2" = "No", "1" = "Sí"
 )
-data[, P6090 := acceso_health[as.character(P6090)]]
+geih[, P6090 := acceso_health[as.character(P6090)]]
 
-# 4. 
-# Afiliación al sistema de salud
+# 4. Afiliación al sistema de salud
 replacement_map_afiliacion <- c(
   "1" = "Contributivo", "2" = "Especial", "3" = "Subsidiado", "9" = "No informa"
 )
 
-data[, P6100 := replacement_map_afiliacion[as.character(P6100)]]
+geih[, P6100 := replacement_map_afiliacion[as.character(P6100)]]
 
 # 5. Tipo de trabajo
 
@@ -95,7 +87,7 @@ ocupacion_map_short <- c(
   "4" = "Cuenta propia", "5" = "Empleador", "6" = "Trabajador familiar sin pago",
   "7" = "Trabajador sin pago", "8" = "Jornalero", "9" = "Otro"
 )
-data[, P6430 := ocupacion_map_short[as.character(P6430)]]
+geih[, P6430 := ocupacion_map_short[as.character(P6430)]]
 
 # 6. La vivienda ocupada por este hogar es:
 
@@ -105,7 +97,7 @@ propiedad_map_short <- c(
   "3" = "En arriendo/subarriendo", "4" = "En usufructo", "5" = "Posesión sin título",
   "6" = "Propiedad colectiva", "7" = "Otra"
 )
-data[, P5090 := propiedad_map_short[as.character(P5090)]]
+geih[, P5090 := propiedad_map_short[as.character(P5090)]]
 
 # 7. Variables de Motivos de Migración
 
@@ -116,27 +108,23 @@ replacement_map_p3386 <- c(
   "8" = "Acompañar hogar", "9" = "Motivos culturales", "10" = "Vivienda propia",
   "12" = "Otro"
 )
-data[, P3386 := replacement_map_p3386[as.character(P3386)]]
+geih[, P3386 := replacement_map_p3386[as.character(P3386)]]
 
-# 8. Sexo de la poblacion
+# 8. Sexo de la población
 replacement_sexo <- c(
   "1"= "Hombres", "2" = "Mujeres"
 )
-data[, P3271 := replacement_sexo[as.character(P3271)]]
+geih[, P3271 := replacement_sexo[as.character(P3271)]]
 
-#Condiciones del Hogar 
+# Condiciones del Hogar 
 
 replacement_con <- c(
   "1" = "si",  "2" = "no"
 )
-data[, P4030S1 := replacement_con[as.character(P4030S1)] ]
-
-data[, P4030S2 := replacement_con[as.character(P4030S2)] ]
-
-data[, P4030S3 := replacement_con[as.character(P4030S3)] ]
-
-data[, P4030S5 := replacement_con[as.character(P4030S5)] ]
-
+geih[, P4030S1 := replacement_con[as.character(P4030S1)] ]
+geih[, P4030S2 := replacement_con[as.character(P4030S2)] ]
+geih[, P4030S3 := replacement_con[as.character(P4030S3)] ]
+geih[, P4030S5 := replacement_con[as.character(P4030S5)] ]
 
 # Definir las variables de interés para el análisis de migrantes
 migrant_variables <- c(
@@ -160,9 +148,5 @@ migrant_variables <- c(
 
 ###################### DATA.TABLE, FILTRADA PARA LOS VENEZOLANOS #############
 
-
 # Filtrar los datos de migrantes que cumplan ciertas condiciones
-Venezuelan_Migrants <- data[P3373S3 == 862 & P3374S1 == 862, migrant_variables, with = FALSE]
-
-
-
+Venezuelan_Migrants <- geih[P3373S3 == 862 & P3374S1 == 862, migrant_variables, with = FALSE]

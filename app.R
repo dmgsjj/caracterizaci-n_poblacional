@@ -13,9 +13,10 @@ library(openxlsx)
 library(DT)
 
 source('funciones/join_geih.R')
+source('preparacion/preparacion.R')
 source('preparacion/caracterizacion_nacional.R')
 source('preparacion/caracterizacion_departamento.R')
-source('preparacion/preparacion.R')
+
 
 
 # Lista de departamentos de Colombia
@@ -218,17 +219,17 @@ server <- function(input, output, session) {
         
         # Crear una lista con todos los resultados
         resultados <- list(
-          pyramid_population_result = pyramid_population_nacional(data),
-          marital_status_result = marital_status_nacional(data),
-          sex_result = sex_nacional(data),
-          education_achieved_result = education_achieved_nacional(data),
-          income_by_education_result = income_by_education_nacional(data),
-          group_variables_result = group_variables_nacional(data),
-          job_type_result = job_type_nacional(data),
-          calcular_tipo_vivienda_result = calcular_tipo_vivienda_nacional(data),
-          home_conditions_result = calcular_condiciones_hogar_nacional(data),
-          calcular_acceso_salud_result = calcular_acceso_salud_nacional(data),
-          calcular_afiliacion_salud_result = calcular_afiliacion_salud_nacional(data)
+          pyramid_population_result = pyramid_population_nacional(geih),
+          marital_status_result = marital_status_nacional(geih),
+          sex_result = sex_nacional(geih),
+          education_achieved_result = education_achieved_nacional(geih),
+          income_by_education_result = income_by_education_nacional(geih),
+          group_variables_result = group_variables_nacional(geih),
+          job_type_result = job_type_nacional(geih),
+          calcular_tipo_vivienda_result = calcular_tipo_vivienda_nacional(geih),
+          home_conditions_result = calcular_condiciones_hogar_nacional(geih),
+          calcular_acceso_salud_result = calcular_acceso_salud_nacional(geih),
+          calcular_afiliacion_salud_result = calcular_afiliacion_salud_nacional(geih)
         )
         
       } else {
@@ -253,18 +254,19 @@ server <- function(input, output, session) {
         req(input$department_selection)
         
         resultados <- list(
-          pyramid_population_result = piramide_poblaciona_dep(data, input$department_selection) ,
-          marital_status_result = marital_status_dep(data, input$department_selection),
-          sex_result = sexo_departamento_dep(data, input$department_selection),
-          education_achieved_result = nivel_educacion_dep(data, input$department_selection) ,
-          income_by_education_result = ingreso_por_educacion_dep(data, input$department_selection),
-          group_variables_result = estadisticas_laborales_dep(data, input$department_selection),
-          job_type_result = tipo_trabajo_dep(data, input$department_selection),
-          calcular_tipo_vivienda_result = tipo_vivienda_dep(data, input$department_selection),
-          home_conditions_result = calcular_condiciones_hogar_dep(data, input$department_selection),
-          calcular_acceso_salud_result = cobertura_salud_dep(data, input$department_selection),
-          calcular_afiliacion_salud_result = afiliacion_salud_dep(data, input$department_selection)
+          pyramid_population_result = piramide_poblaciona_dep(geih, input$department_selection),
+          marital_status_result = marital_status_dep(geih, input$department_selection),
+          sex_result = sexo_departamento_dep(geih, input$department_selection),
+          education_achieved_result = nivel_educacion_dep(geih, input$department_selection),
+          income_by_education_result = ingreso_por_educacion_dep(geih, input$department_selection),
+          group_variables_result = estadisticas_laborales_dep(geih, input$department_selection),
+          job_type_result = tipo_trabajo_dep(geih, input$department_selection),
+          calcular_tipo_vivienda_result = tipo_vivienda_dep(geih, input$department_selection),
+          home_conditions_result = calcular_condiciones_hogar_dep(geih, input$department_selection),
+          calcular_acceso_salud_result = cobertura_salud_dep(geih, input$department_selection),
+          calcular_afiliacion_salud_result = afiliacion_salud_dep(geih, input$department_selection)
         )
+    
         
       } else {
         

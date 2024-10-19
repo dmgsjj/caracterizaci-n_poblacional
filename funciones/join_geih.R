@@ -1,5 +1,7 @@
 #Descomentar eliminando el (#) en caso de no tener instalada la libreria data.table
 #install.packages("data.table")
+# Instalar paquetes (si no están instalados)
+
 
 library(data.table)
 

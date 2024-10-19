@@ -1,5 +1,4 @@
 library(data.table)
-geih <- fread("geih_complete.csv")
 
 # Pirámide poblacional a nivel nacional
 pyramid_population_nacional <- function(geih) {

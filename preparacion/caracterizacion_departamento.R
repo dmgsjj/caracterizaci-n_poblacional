@@ -1,6 +1,6 @@
 library(data.table)
 
-geih <- fread("geih_complete.csv")
+
 
 # Pirámide de población por departamento
 piramide_poblaciona_dep <- function(geih, department_selection) {

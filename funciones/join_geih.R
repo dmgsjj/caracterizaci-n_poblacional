@@ -68,7 +68,7 @@ geih_completed <- function () {
     
   }
   
-  fwrite(all_months, file = "geih_complete.csv")
+  #fwrite(all_months, file = "geih_complete.csv")
   return (all_months)
 }
 

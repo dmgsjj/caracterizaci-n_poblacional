@@ -2,7 +2,7 @@
 library(data.table)
 library(scales)
 
-geih <- geih_completed()
+geih <- fread("geih_complete.csv")
 
 #REEMPLAZAR CODIGO DE LOS DEPARTAMENTOS POR SU NOMBRE RESPECTIVO
 geih[, DPTO := fcase(
